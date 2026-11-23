@@ -1,4 +1,4 @@
-# Réplica Fiel — Curso Completo de Java Spring Boot desde Cero (INFORMATICONFIG)
+# Curso Completo de Java Spring Boot desde Cero (INFORMATICONFIG)
 
 Colección consolidada de los **5 proyectos Maven** construidos a lo largo de los **48 videos** del curso de Spring Boot de INFORMATICONFIG, auditados para garantizar consistencia de paquetes, imports, versiones estables de Spring Boot y empaquetado sin conflictos.
 
