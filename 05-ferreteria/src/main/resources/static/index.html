@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferretería Antillana - Control de Inventario</title>
+    <style>
+        :root {
+            --primary: #1f3b57;
+            --accent: #e67e22;
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --border: #dce1e7;
+            --text: #2c3e50;
+        }
+        * { box-sizing: border-box; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); }
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        nav a { color: #dbe7f3; text-decoration: none; margin-left: 18px; font-size: 0.95rem; }
+        nav a:hover { color: #fff; text-decoration: underline; }
+        main { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            background: var(--card); padding: 16px; border-radius: 8px;
+            border: 1px solid var(--border); margin-bottom: 20px;
+        }
+        button {
+            background: var(--primary); color: #fff; border: none;
+            padding: 10px 16px; border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        button.accent { background: var(--accent); }
+        button.danger { background: #c0392b; }
+        .panel {
+            background: var(--card); padding: 20px; border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px; margin-bottom: 14px;
+        }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+        input {
+            width: 100%; padding: 8px 10px; border: 1px solid #bfc9d4;
+            border-radius: 5px; font-size: 0.95rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { background: #eef2f6; }
+        .hidden { display: none; }
+        .status { margin-top: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Ferretería Antillana</h1>
+    <nav>
+        <a href="#">Inicio</a>
+        <a href="#">Control de Inventario</a>
+        <a href="/logout">Cerrar sesión</a>
+    </nav>
+</header>
+
+<main>
+    <h2>Control de Inventario</h2>
+    <div class="toolbar">
+        <button onclick="listarProductos()">Listar artículos</button>
+        <button onclick="mostrarSeccion('sec-buscar')">Buscar ID de artículo</button>
+        <button class="accent" onclick="mostrarSeccion('sec-insertar')">Insertar artículo</button>
+        <button onclick="mostrarSeccion('sec-actualizar')">Actualizar artículo</button>
+        <button class="danger" onclick="mostrarSeccion('sec-eliminar')">Eliminar artículo</button>
+    </div>
+
+    <!-- Sección Lista -->
+    <div id="sec-lista" class="panel">
+        <h3>Listado de Artículos</h3>
+        <div id="tabla-contenedor">Haz clic en "Listar artículos" para consultar la base de datos.</div>
+    </div>
+
+    <!-- Sección Buscar por ID -->
+    <div id="sec-buscar" class="panel hidden">
+        <h3>Buscar Artículo por ID</h3>
+        <div class="form-grid">
+            <div>
+                <label for="buscar-id">ID del artículo</label>
+                <input type="number" id="buscar-id" min="1" placeholder="Ej. 5">
+            </div>
+        </div>
+        <button onclick="buscarPorId()">Buscar</button>
+        <div id="resultado-busqueda" class="status"></div>
+    </div>
+
+    <!-- Sección Insertar -->
+    <div id="sec-insertar" class="panel hidden">
+        <h3>Insertar Nuevo Artículo</h3>
+        <div class="form-grid">
+            <div>
+                <label for="ins-nombre">Nombre del producto</label>
+                <input type="text" id="ins-nombre" placeholder="Ej. Taladro rotomartillo">
+            </div>
+            <div>
+                <label for="ins-precio">Precio</label>
+                <input type="number" step="0.01" id="ins-precio" placeholder="Ej. 200.31">
+            </div>
+            <div>
+                <label for="ins-existencia">Existencia</label>
+                <input type="number" id="ins-existencia" placeholder="Ej. 8">
+            </div>
+        </div>
+        <button class="accent" onclick="insertarProducto()">Guardar artículo</button>
+        <div id="resultado-insertar" class="status"></div>
+    </div>
+
+    <!-- Sección Actualizar -->
+    <div id="sec-actualizar" class="panel hidden">
+        <h3>Actualizar Artículo</h3>
+        <div class="form-grid">
+            <div>
+                <label for="upd-id">ID del producto a actualizar</label>
+                <input type="number" id="upd-id" min="1" placeholder="Ej. 1">
+            </div>
+            <div>
+                <label for="upd-nombre">Nuevo nombre</label>
+                <input type="text" id="upd-nombre" placeholder="Ej. Martillo eléctrico">
+            </div>
+            <div>
+                <label for="upd-precio">Nuevo precio</label>
+                <input type="number" step="0.01" id="upd-precio" placeholder="Ej. 30.40">
+            </div>
+            <div>
+                <label for="upd-existencia">Nueva existencia</label>
+                <input type="number" id="upd-existencia" placeholder="Ej. 15">
+            </div>
+        </div>
+        <button onclick="actualizarProducto()">Actualizar</button>
+        <div id="resultado-actualizar" class="status"></div>
+    </div>
+
+    <!-- Sección Eliminar -->
+    <div id="sec-eliminar" class="panel hidden">
+        <h3>Eliminar Artículo</h3>
+        <div class="form-grid">
+            <div>
+                <label for="del-id">ID del producto a eliminar</label>
+                <input type="number" id="del-id" min="1" placeholder="Ej. 1">
+            </div>
+        </div>
+        <button class="danger" onclick="eliminarProducto()">Eliminar</button>
+        <div id="resultado-eliminar" class="status"></div>
+    </div>
+</main>
+
+<script>
+    const baseUrl = window.location.origin.startsWith("http")
+        ? window.location.origin + "/api/articulos"
+        : "http://localhost:8081/api/articulos";
+
+    function mostrarSeccion(id) {
+        ["sec-lista", "sec-buscar", "sec-insertar", "sec-actualizar", "sec-eliminar"].forEach(s => {
+            document.getElementById(s).classList.toggle("hidden", s !== id);
+        });
+    }
+
+    async function listarProductos() {
+        mostrarSeccion("sec-lista");
+        const cont = document.getElementById("tabla-contenedor");
+        cont.textContent = "Cargando artículos...";
+        try {
+            const resp = await fetch(baseUrl, { credentials: "same-origin" });
+            if (!resp.ok) throw new Error("Error HTTP " + resp.status);
+            const datos = await resp.json();
+            if (!datos.length) {
+                cont.textContent = "No hay artículos registrados.";
+                return;
+            }
+            let html = "<table><thead><tr><th>ID</th><th>Artículo</th><th>Precio</th><th>Existencia</th></tr></thead><tbody>";
+            datos.forEach(a => {
+                html += `<tr><td>${a.id}</td><td>${a.nombreArticulo}</td><td>$${Number(a.precio).toFixed(2)}</td><td>${a.existencia}</td></tr>`;
+            });
+            html += "</tbody></table>";
+            cont.innerHTML = html;
+        } catch (err) {
+            cont.textContent = "No se pudieron cargar los artículos: " + err.message;
+        }
+    }
+
+    async function buscarPorId() {
+        const id = document.getElementById("buscar-id").value;
+        const out = document.getElementById("resultado-busqueda");
+        if (!id) { out.textContent = "Ingresa un ID válido."; return; }
+        try {
+            const resp = await fetch(`${baseUrl}/${id}`, { credentials: "same-origin" });
+            if (!resp.ok) {
+                out.textContent = "Producto no encontrado.";
+                return;
+            }
+            const a = await resp.json();
+            out.innerHTML = `ID: ${a.id} | Nombre: ${a.nombreArticulo} | Precio: $${Number(a.precio).toFixed(2)} | Existencia: ${a.existencia}`;
+        } catch (err) {
+            out.textContent = "Producto no encontrado.";
+        }
+    }
+
+    async function insertarProducto() {
+        const payload = {
+            nombreArticulo: document.getElementById("ins-nombre").value.trim(),
+            precio: parseFloat(document.getElementById("ins-precio").value),
+            existencia: parseInt(document.getElementById("ins-existencia").value, 10)
+        };
+        const out = document.getElementById("resultado-insertar");
+        try {
+            const resp = await fetch(baseUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify(payload)
+            });
+            if (!resp.ok) throw new Error("Error HTTP " + resp.status);
+            const creado = await resp.json();
+            alert("Producto agregado correctamente.");
+            out.textContent = `Agregado con ID ${creado.id}: ${creado.nombreArticulo} ($${creado.precio}, existencia: ${creado.existencia})`;
+        } catch (err) {
+            out.textContent = "Error al insertar: " + err.message;
+        }
+    }
+
+    async function actualizarProducto() {
+        const id = document.getElementById("upd-id").value;
+        const payload = {
+            nombreArticulo: document.getElementById("upd-nombre").value.trim(),
+            precio: parseFloat(document.getElementById("upd-precio").value),
+            existencia: parseInt(document.getElementById("upd-existencia").value, 10)
+        };
+        const out = document.getElementById("resultado-actualizar");
+        try {
+            const resp = await fetch(`${baseUrl}/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify(payload)
+            });
+            if (!resp.ok) throw new Error("Error HTTP " + resp.status);
+            const upd = await resp.json();
+            alert("Producto actualizado correctamente.");
+            out.textContent = `Actualizado ID ${upd.id}: ${upd.nombreArticulo} ($${upd.precio}, existencia: ${upd.existencia})`;
+        } catch (err) {
+            out.textContent = "Error al actualizar: " + err.message;
+        }
+    }
+
+    async function eliminarProducto() {
+        const id = document.getElementById("del-id").value;
+        const out = document.getElementById("resultado-eliminar");
+        try {
+            const resp = await fetch(`${baseUrl}/${id}`, {
+                method: "DELETE",
+                credentials: "same-origin"
+            });
+            const msg = await resp.text();
+            alert(msg);
+            out.textContent = msg;
+        } catch (err) {
+            out.textContent = "Error al eliminar: " + err.message;
+        }
+    }
+</script>
+</body>
+</html>
