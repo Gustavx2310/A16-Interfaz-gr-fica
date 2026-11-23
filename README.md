@@ -20,7 +20,7 @@ Colección consolidada de los **5 proyectos Maven** construidos a lo largo de lo
 
 ## Cómo ejecutar cada proyecto
 
-Cada carpeta es un proyecto Maven independiente. Abre el `pom.xml` del módulo que quieras probar en IntelliJ IDEA (*Open as Project*) o ejecuta en CMD desde su carpeta:
+Cada carpeta es un proyecto Maven independiente. Abre el `pom.xml` del módulo que quieras probar en Visual Studio Code o ejecuta en CMD desde su carpeta:
 
 ```bash
 cd 01-springboot-app1
